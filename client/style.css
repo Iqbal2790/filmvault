@@ -1669,9 +1669,18 @@ body {
   }
   .drawer-topbar { padding: 20px 20px 14px 20px; border-bottom: none; }
   .drawer-hero { padding: 0 20px 20px; border-bottom: 1px solid var(--line); }
-  .drawer-scroll { padding: 20px; padding-bottom: 80px; }
-  .drawer-footer { display: none; /* Kita pindahkan aksi edit ke topbar drawer atau FAB, tapi untuk simple kita pertahankan tombol edit dengan style beda jika butuh */ }
+  .drawer-scroll { padding: 20px; padding-bottom: 20px; }
+  .drawer-footer {
+    display: flex;
+    padding: 16px 20px;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
   
   /* Tombol edit di bawah detail */
-  #drawerEditBtn { width: 100%; margin-top: 20px; }
+  #drawerEditBtn { width: 100%; justify-content: center; }
 }
