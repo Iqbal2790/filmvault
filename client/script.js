@@ -186,11 +186,11 @@ async function initAuth() {
       const toolbar = document.querySelector('.toolbar');
       
       if (landingPage) landingPage.style.display = 'none';
-      if (mainPage) mainPage.style.display = 'block';
-      if (alphaNav) alphaNav.style.display = 'block';
-      if (bottomNav) bottomNav.style.display = 'flex';
-      if (navTabs) navTabs.style.display = 'flex';
-      if (toolbar) toolbar.style.display = 'block';
+      if (mainPage) mainPage.style.display = '';
+      if (alphaNav) alphaNav.style.display = '';
+      if (bottomNav) bottomNav.style.display = '';
+      if (navTabs) navTabs.style.display = '';
+      if (toolbar) toolbar.style.display = '';
       
       loadMovies(); 
       loadStats();
@@ -212,7 +212,7 @@ async function initAuth() {
       const navTabs = document.querySelector('.nav-tabs');
       const toolbar = document.querySelector('.toolbar');
       
-      if (landingPage) landingPage.style.display = 'flex';
+      if (landingPage) landingPage.style.display = '';
       if (mainPage) mainPage.style.display = 'none';
       if (alphaNav) alphaNav.style.display = 'none';
       if (bottomNav) bottomNav.style.display = 'none';
