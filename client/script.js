@@ -127,9 +127,6 @@ async function initAuth() {
   const addBtn = document.getElementById('openAddModal');
   const grid = document.getElementById('gridContainer');
   const empty = document.getElementById('emptyState');
-
-  const profileBtn = document.getElementById('profileBtn');
-  const profileName = document.getElementById('profileName');
   const settingsBtn = document.getElementById('settingsBtn');
 
   loginBtn.addEventListener('click', async () => {
@@ -143,14 +140,6 @@ async function initAuth() {
 
   logoutBtn.addEventListener('click', async () => {
     await supabase.auth.signOut();
-  });
-  
-  profileBtn.addEventListener('click', () => {
-    if (state.loggedInUsername) {
-      const url = `${window.location.origin}?user=${state.loggedInUsername}`;
-      navigator.clipboard.writeText(url);
-      showToast('Link profil berhasil disalin!');
-    }
   });
 
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -183,8 +172,6 @@ async function initAuth() {
       
       state.loggedInUsername = username;
       state.loggedInIsPublic = isPublic;
-      profileName.textContent = username;
-      profileBtn.style.display = 'inline-flex';
       settingsBtn.style.display = 'inline-flex';
       
       loadMovies(); 
@@ -193,7 +180,6 @@ async function initAuth() {
       // Logged out
       loginBtn.style.display = 'inline-flex';
       logoutBtn.style.display = 'none';
-      profileBtn.style.display = 'none';
       settingsBtn.style.display = 'none';
       addBtn.style.display = 'none';
       
@@ -293,9 +279,6 @@ function initSettings() {
 
       state.loggedInUsername = newUsername;
       state.loggedInIsPublic = inputIsPublic.checked;
-      
-      const profileName = document.getElementById('profileName');
-      if (profileName) profileName.textContent = newUsername;
 
       showToast('Pengaturan profil berhasil disimpan!');
       closeModal();
