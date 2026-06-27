@@ -670,6 +670,14 @@ function initDrawer() {
     ?.addEventListener('click', () => {
       if (state.current) openModal(state.current);
     });
+
+  document.getElementById('drawerDeleteBtn')
+    ?.addEventListener('click', () => {
+      if (state.current) {
+        deleteFilm(state.current);
+        closeDrawer(); // Tutup drawer setelah dihapus
+      }
+    });
 }
 
 function openDrawer(film) {
@@ -757,10 +765,14 @@ function openDrawer(film) {
   
   if (state.isPublicView) {
     const editBtn = document.getElementById('drawerEditBtn');
+    const deleteBtn = document.getElementById('drawerDeleteBtn');
     if (editBtn) editBtn.style.display = 'none';
+    if (deleteBtn) deleteBtn.style.display = 'none';
   } else {
     const editBtn = document.getElementById('drawerEditBtn');
+    const deleteBtn = document.getElementById('drawerDeleteBtn');
     if (editBtn) editBtn.style.display = 'inline-flex';
+    if (deleteBtn) deleteBtn.style.display = 'inline-flex';
   }
 
   drawerBg?.classList.add('open');

@@ -926,6 +926,11 @@ body {
   flex-shrink: 0;
 }
 
+#drawerEditBtn, #drawerDeleteBtn {
+  flex: 1;
+  justify-content: center;
+}
+
 /* ── MODAL ── */
 .modal-bg {
   position: fixed; inset: 0;
@@ -1681,6 +1686,6 @@ body {
     z-index: 10;
   }
   
-  /* Tombol edit di bawah detail */
-  #drawerEditBtn { width: 100%; justify-content: center; }
+  /* Tombol edit & hapus di bawah detail */
+  #drawerEditBtn, #drawerDeleteBtn { width: auto; justify-content: center; }
 }
