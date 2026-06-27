@@ -177,6 +177,16 @@ async function initAuth() {
       state.loggedInIsPublic = isPublic;
       settingsBtn.style.display = 'inline-flex';
       
+      // Sembunyikan Landing Page, tampilkan Main App
+      const landingPage = document.getElementById('landingPage');
+      const mainPage = document.querySelector('.page');
+      const alphaNav = document.querySelector('.alpha-strip');
+      const bottomNav = document.querySelector('.bottom-nav');
+      if (landingPage) landingPage.style.display = 'none';
+      if (mainPage) mainPage.style.display = 'block';
+      if (alphaNav) alphaNav.style.display = 'block';
+      if (bottomNav) bottomNav.style.display = 'flex';
+      
       loadMovies(); 
       loadStats();
     } else {
@@ -189,12 +199,24 @@ async function initAuth() {
       const fabBtn = document.getElementById('fabAddBtn');
       if (fabBtn) fabBtn.style.display = 'none';
       
+      // Tampilkan Landing Page, sembunyikan Main App
+      const landingPage = document.getElementById('landingPage');
+      const mainPage = document.querySelector('.page');
+      const alphaNav = document.querySelector('.alpha-strip');
+      const bottomNav = document.querySelector('.bottom-nav');
+      if (landingPage) landingPage.style.display = 'flex';
+      if (mainPage) mainPage.style.display = 'none';
+      if (alphaNav) alphaNav.style.display = 'none';
+      if (bottomNav) bottomNav.style.display = 'none';
+      
       grid.innerHTML = '';
-      empty.style.display = 'flex';
-      empty.querySelector('.empty-title').innerText = 'Silakan Login Terlebih Dahulu';
-      empty.querySelector('.empty-sub').innerText = 'Data film tersimpan di cloud';
-      empty.querySelector('.btn')?.remove();
+      empty.style.display = 'none';
     }
+  });
+
+  // Bind login ke tombol di landing page
+  document.getElementById('landingLoginBtn')?.addEventListener('click', () => {
+    supabase.auth.signInWithOAuth({ provider: 'google' });
   });
 }
 
