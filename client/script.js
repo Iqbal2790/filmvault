@@ -125,12 +125,23 @@ async function initAuth() {
   const grid = document.getElementById('gridContainer');
   const empty = document.getElementById('emptyState');
 
+  const profileBtn = document.getElementById('profileBtn');
+  const profileName = document.getElementById('profileName');
+
   loginBtn.addEventListener('click', async () => {
     await supabase.auth.signInWithOAuth({ provider: 'google' });
   });
 
   logoutBtn.addEventListener('click', async () => {
     await supabase.auth.signOut();
+  });
+  
+  profileBtn.addEventListener('click', () => {
+    if (state.loggedInUsername) {
+      const url = `${window.location.origin}?user=${state.loggedInUsername}`;
+      navigator.clipboard.writeText(url);
+      showToast('Link profil berhasil disalin!');
+    }
   });
 
   supabase.auth.onAuthStateChange(async (event, session) => {
@@ -141,6 +152,8 @@ async function initAuth() {
       addBtn.style.display = 'inline-flex';
       empty.style.display = 'none';
       
+      let username = session.user.email.split('@')[0];
+
       // Auto create profile if not exists
       const { data, error } = await supabase
         .from('profiles')
@@ -150,9 +163,15 @@ async function initAuth() {
         
       if (error && error.code === 'PGRST116') {
         await supabase.from('profiles').insert([
-          { id: session.user.id, username: session.user.email.split('@')[0] }
+          { id: session.user.id, username: username }
         ]);
+      } else if (data && data.username) {
+        username = data.username;
       }
+      
+      state.loggedInUsername = username;
+      profileName.textContent = username;
+      profileBtn.style.display = 'inline-flex';
       
       loadMovies(); 
       loadStats();
@@ -160,6 +179,7 @@ async function initAuth() {
       // Logged out
       loginBtn.style.display = 'inline-flex';
       logoutBtn.style.display = 'none';
+      profileBtn.style.display = 'none';
       addBtn.style.display = 'none';
       
       grid.innerHTML = '';
