@@ -182,10 +182,15 @@ async function initAuth() {
       const mainPage = document.querySelector('.page');
       const alphaNav = document.querySelector('.alpha-strip');
       const bottomNav = document.querySelector('.bottom-nav');
+      const navTabs = document.querySelector('.nav-tabs');
+      const toolbar = document.querySelector('.toolbar');
+      
       if (landingPage) landingPage.style.display = 'none';
       if (mainPage) mainPage.style.display = 'block';
       if (alphaNav) alphaNav.style.display = 'block';
       if (bottomNav) bottomNav.style.display = 'flex';
+      if (navTabs) navTabs.style.display = 'flex';
+      if (toolbar) toolbar.style.display = 'block';
       
       loadMovies(); 
       loadStats();
@@ -204,10 +209,15 @@ async function initAuth() {
       const mainPage = document.querySelector('.page');
       const alphaNav = document.querySelector('.alpha-strip');
       const bottomNav = document.querySelector('.bottom-nav');
+      const navTabs = document.querySelector('.nav-tabs');
+      const toolbar = document.querySelector('.toolbar');
+      
       if (landingPage) landingPage.style.display = 'flex';
       if (mainPage) mainPage.style.display = 'none';
       if (alphaNav) alphaNav.style.display = 'none';
       if (bottomNav) bottomNav.style.display = 'none';
+      if (navTabs) navTabs.style.display = 'none';
+      if (toolbar) toolbar.style.display = 'none';
       
       grid.innerHTML = '';
       empty.style.display = 'none';
