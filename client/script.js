@@ -26,6 +26,8 @@ const state = {
   isPublicView: false,
   publicUserId: null,
   publicUsername: null,
+  loggedInUsername: null,
+  loggedInIsPublic: true,
 };
 
 // ════════════════════════════════════════════
@@ -96,6 +98,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   initAuth();
+  initSettings();
   initSearch();
   initSort();
   initAlpha();
@@ -127,6 +130,7 @@ async function initAuth() {
 
   const profileBtn = document.getElementById('profileBtn');
   const profileName = document.getElementById('profileName');
+  const settingsBtn = document.getElementById('settingsBtn');
 
   loginBtn.addEventListener('click', async () => {
     await supabase.auth.signInWithOAuth({ 
@@ -166,17 +170,22 @@ async function initAuth() {
         .eq('id', session.user.id)
         .single();
         
+      let isPublic = true;
+      
       if (error && error.code === 'PGRST116') {
         await supabase.from('profiles').insert([
-          { id: session.user.id, username: username }
+          { id: session.user.id, username: username, is_public: true }
         ]);
-      } else if (data && data.username) {
-        username = data.username;
+      } else if (data) {
+        if (data.username) username = data.username;
+        if (data.is_public !== undefined) isPublic = data.is_public;
       }
       
       state.loggedInUsername = username;
+      state.loggedInIsPublic = isPublic;
       profileName.textContent = username;
       profileBtn.style.display = 'inline-flex';
+      settingsBtn.style.display = 'inline-flex';
       
       loadMovies(); 
       loadStats();
@@ -185,6 +194,7 @@ async function initAuth() {
       loginBtn.style.display = 'inline-flex';
       logoutBtn.style.display = 'none';
       profileBtn.style.display = 'none';
+      settingsBtn.style.display = 'none';
       addBtn.style.display = 'none';
       
       grid.innerHTML = '';
@@ -213,6 +223,92 @@ function initTheme() {
     });
 }
 
+// ════════════════════════════════════════════
+// SETTINGS
+// ════════════════════════════════════════════
+function initSettings() {
+  const btn = document.getElementById('settingsBtn');
+  const modal = document.getElementById('settingsModal');
+  const closeBtn = document.getElementById('settingsCloseBtn');
+  const cancelBtn = document.getElementById('settingsCancelBtn');
+  const saveBtn = document.getElementById('settingsSaveBtn');
+  
+  const inputUsername = document.getElementById('settingUsername');
+  const inputIsPublic = document.getElementById('settingIsPublic');
+  const preview = document.getElementById('settingUrlPreview');
+
+  const updatePreview = () => {
+    preview.textContent = `${window.location.origin}?user=${inputUsername.value.trim()}`;
+  };
+
+  inputUsername?.addEventListener('input', updatePreview);
+
+  const openModal = () => {
+    if (!modal) return;
+    inputUsername.value = state.loggedInUsername || '';
+    inputIsPublic.checked = state.loggedInIsPublic;
+    updatePreview();
+    modal.classList.add('open');
+  };
+
+  const closeModal = () => {
+    modal?.classList.remove('open');
+  };
+
+  btn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  cancelBtn?.addEventListener('click', closeModal);
+
+  saveBtn?.addEventListener('click', async () => {
+    const newUsername = inputUsername.value.trim();
+    if (!newUsername) return showToast('Username tidak boleh kosong', 'error');
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+      // Periksa apakah username sudah dipakai orang lain
+      if (newUsername !== state.loggedInUsername) {
+        const { data: existing } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', newUsername)
+          .neq('id', user.id)
+          .single();
+          
+        if (existing) {
+          return showToast('Username sudah dipakai orang lain!', 'error');
+        }
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          username: newUsername, 
+          is_public: inputIsPublic.checked 
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      state.loggedInUsername = newUsername;
+      state.loggedInIsPublic = inputIsPublic.checked;
+      
+      const profileName = document.getElementById('profileName');
+      if (profileName) profileName.textContent = newUsername;
+
+      showToast('Pengaturan profil berhasil disimpan!');
+      closeModal();
+    } catch (err) {
+      console.error(err);
+      showToast('Gagal menyimpan pengaturan', 'error');
+    }
+  });
+}
+
+// ════════════════════════════════════════════
+// THEME DOM
+// ════════════════════════════════════════════
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   localStorage.setItem('filmvault-theme', theme);
