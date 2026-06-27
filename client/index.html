@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FilmVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- TOPNAV -->
+  <nav class="topnav">
+    <div class="topnav-inner">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>
+        </div>
+        FilmVault
+      </div>
+      <div class="nav-tabs">
+        <div class="nav-tab active" id="tabAll" data-filter="all">
+          Semua <span class="tab-count" id="tabCountAll">0</span>
+        </div>
+        <div class="nav-tab" id="tabApproved" data-filter="1">
+          Approved <span class="tab-count" id="tabCountApproved">0</span>
+        </div>
+        <div class="nav-tab" id="tabReview" data-filter="0">
+          Perlu Review <span class="tab-count" id="tabCountReview">0</span>
+        </div>
+      </div>
+      <div class="topnav-right">
+        <button class="btn-theme-toggle" id="themeToggleBtn" title="Ganti tema" aria-label="Toggle dark mode">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+        </button>
+        <button class="btn btn-outline" id="loginBtn" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+          Login with Google
+        </button>
+        <button class="btn btn-outline" id="logoutBtn" style="display:none;" title="Logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+        <button class="btn btn-primary" id="openAddModal" style="display:none;" onclick="window.openModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Tambah Film
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="searchInput" placeholder="Cari judul, genre, sutradara...">
+        <button class="search-clear" id="searchClear" title="Hapus pencarian">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <div class="sort-btns">
+        <button class="sort-btn active" data-sort="title_asc">A–Z</button>
+        <button class="sort-btn" data-sort="title_desc">Z–A</button>
+        <button class="sort-btn" data-sort="rating">Rating</button>
+        <button class="sort-btn" data-sort="year">Tahun</button>
+        <button class="sort-btn" data-sort="added_date">Terbaru</button>
+      </div>
+      <select class="filter-select sort-dropdown-mobile" id="sortDropdownMobile">
+        <option value="title_asc">Urutan: A–Z</option>
+        <option value="title_desc">Urutan: Z–A</option>
+        <option value="rating">Rating Tertinggi</option>
+        <option value="year">Tahun Terbaru</option>
+        <option value="added_date">Baru Ditambah</option>
+      </select>
+
+    </div>
+  </div>
+
+  <!-- ALPHA STRIP -->
+  <div class="alpha-strip">
+    <div class="alpha-strip-inner" id="alphaNav"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="page">
+    <div class="stats-strip">
+      <div class="stat-tile">
+        <div class="stat-top"><span class="stat-label">Total Film</span><div class="stat-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg></div></div>
+        <div class="stat-val" id="statsTotal">—</div><div class="stat-sub">dalam koleksi</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-top"><span class="stat-label">Approved</span><div class="stat-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg></div></div>
+        <div class="stat-val" id="statsApproved">—</div>
+        <div class="stat-sub" id="statsApprovedSub">dari total</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-top"><span class="stat-label">Perlu Review</span><div class="stat-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div></div>
+        <div class="stat-val" id="statsReview">—</div><div class="stat-sub">belum divalidasi</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-top"><span class="stat-label">Rata-rata Rating</span><div class="stat-icon amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div>
+        <div class="stat-val" id="statsRating">—</div><div class="stat-sub">dari skala 10</div>
+      </div>
+    </div>
+
+    <div id="loadingState" class="loading-state"><div class="loading-spinner"></div> Memuat koleksi…</div>
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <h3 class="empty-title">Tidak ada film ditemukan</h3>
+      <p class="empty-sub">Coba ubah kata kunci atau reset filter</p>
+      <button class="btn btn-outline" onclick="window.resetFilter()">Reset Filter</button>
+    </div>
+    <div id="gridContainer"></div>
+  </main>
+
+  <!-- DETAIL DRAWER -->
+  <div class="drawer-bg" id="drawerBg">
+    <div class="drawer" id="detailDrawer">
+      <div class="drawer-topbar">
+        <span class="drawer-eyebrow">Detail Film</span>
+        <button class="drawer-close" id="drawerClose" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="drawer-hero">
+        <div class="drawer-poster">
+          <div class="drawer-poster-lines"></div>
+          <span class="drawer-poster-init" id="drawerInit">??</span>
+          <img id="drawerPosterImg" src="" alt="" style="display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">
+        </div>
+        <div class="drawer-info">
+          <h1 class="drawer-title" id="drawerTitle">—</h1>
+          <p class="drawer-local" id="drawerLocal">—</p>
+          <div class="drawer-pills">
+            <span class="badge" id="drawerStatus">Perlu Review</span>
+            <span class="chip" id="drawerGenre">—</span>
+            <span class="chip" id="drawerYear">—</span>
+            <span class="chip" id="drawerRating">★ —</span>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-scroll">
+        <div class="drawer-section"><div class="drawer-section-title">Sinopsis</div><p class="drawer-synopsis" id="drawerSynopsis">—</p></div>
+        <div class="drawer-section"><div class="drawer-section-title">Detail Produksi</div>
+          <div class="detail-pairs">
+            <div><div class="detail-key">Sutradara</div><div class="detail-val" id="drawerDirector">—</div></div>
+            <div><div class="detail-key">Durasi</div><div class="detail-val" id="drawerDuration">—</div></div>
+            <div><div class="detail-key">Negara</div><div class="detail-val" id="drawerCountry">—</div></div>
+            <div><div class="detail-key">Studio</div><div class="detail-val" id="drawerStudio">—</div></div>
+          </div>
+        </div>
+        <div class="drawer-section"><div class="drawer-section-title">Pemeran</div><div class="chip-list" id="drawerActors">—</div></div>
+        <div class="drawer-section"><div class="drawer-section-title">Tags</div><div class="chip-list" id="drawerTags">—</div></div>
+        <div class="drawer-section"><div class="drawer-section-title">File & Path</div>
+          <div class="detail-pairs">
+            <div class="field full"><div class="detail-key">File Film</div><div class="path-val" id="drawerFilePath">—</div></div>
+            <div class="field full"><div class="detail-key">Subtitle</div><div class="path-val" id="drawerSubtitle">—</div></div>
+            <div class="field full"><div class="detail-key">Cover</div><div class="path-val" id="drawerCoverPath">—</div></div>
+            <div class="field full"><div class="detail-key">Background</div><div class="path-val" id="drawerBgPath">—</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="drawer-footer">
+        <button class="btn btn-outline" id="drawerEditBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit Metadata
+        </button>
+        <button class="btn btn-primary" id="approveToggleBtn">Set Approved</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ADD/EDIT -->
+  <div id="addModal" class="modal-bg">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">Tambah Film Baru</h2>
+        <button class="drawer-close" id="modalCloseBtn" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <form id="movieForm" class="modal-scroll" novalidate>
+        <input type="hidden" id="field_id" name="id">
+
+        <!-- ── DROP ZONE POSTER ─────────────────────────────
+             Hanya tampil saat mode edit (film sudah punya ID).
+             Dikendalikan oleh poster-upload.js via openPosterUpload()
+        ──────────────────────────────────────────────────── -->
+        <div class="poster-upload-section" id="posterUploadSection" style="display:none;">
+          <div class="field-label" style="margin-bottom: 8px;">Poster / Cover</div>
+
+          <div class="poster-dropzone" id="posterDropzone">
+            <!-- Preview gambar -->
+            <img class="poster-preview-img" id="posterPreviewImg" alt="Preview poster" style="display:none;">
+
+            <!-- Placeholder sebelum ada gambar -->
+            <div class="poster-dropzone-placeholder" id="posterDropzonePlaceholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              <span class="poster-dropzone-text">Drag &amp; drop poster di sini</span>
+              <span class="poster-dropzone-sub">atau klik untuk pilih file</span>
+              <span class="poster-dropzone-hint">JPG, PNG, WebP · Maks. 5 MB</span>
+            </div>
+
+            <!-- Overlay saat file di-drag -->
+            <div class="poster-dropzone-overlay" id="posterDropzoneOverlay">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span>Lepaskan untuk upload</span>
+            </div>
+
+            <!-- Input file tersembunyi -->
+            <input type="file" id="posterFileInput" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none;">
+          </div>
+
+          <!-- Nama file + tombol hapus (muncul setelah ada poster) -->
+          <div class="poster-upload-meta" id="posterUploadMeta" style="display:none;">
+            <span class="poster-upload-name" id="posterUploadName"></span>
+            <button type="button" class="poster-upload-remove" id="posterRemoveBtn" title="Hapus poster">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+              Hapus poster
+            </button>
+          </div>
+
+          <!-- Progress bar upload -->
+          <div class="poster-progress" id="posterProgress" style="display:none;">
+            <div class="poster-progress-bar" id="posterProgressBar"></div>
+          </div>
+        </div>
+        <!-- ── API AUTO-FILL ── -->
+        <div class="tmdb-search-section" style="background:var(--surface-2); padding:16px; border-radius:12px; margin-bottom:16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px;">
+            <div class="field-label" style="color:var(--ink-1); margin:0;">Tarik Data Otomatis</div>
+            <div style="display:flex; gap:12px; font-size:13px;">
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="search_type" value="movie" checked> Film (TMDB)</label>
+              <label style="display:flex; align-items:center; gap:4px; cursor:pointer;"><input type="radio" name="search_type" value="anime"> Anime (MAL)</label>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="apiSearchInput" class="field-input" placeholder="Cari judul..." style="flex:1;">
+            <button type="button" class="btn btn-outline" id="apiSearchBtn">Cari</button>
+          </div>
+          <div id="apiSearchResults" style="margin-top: 12px; display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto;"></div>
+        </div>
+        <!-- ── END API AUTO-FILL ── -->
+
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="field_title">Judul Asli *</label>
+            <input type="text" id="field_title" name="title" class="field-input" required placeholder="Original title…">
+            <span class="error-msg" id="err-title"></span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="field_local_title">Judul Lokal</label>
+            <input type="text" id="field_local_title" name="local_title" class="field-input" placeholder="Terjemahan judul…">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="field_year">Tahun *</label>
+            <input type="number" id="field_year" name="year" class="field-input" min="1900" max="2100" required placeholder="2024">
+            <span class="error-msg" id="err-year"></span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="field_genre_input">Genre</label>
+            <div class="tag-input-wrapper" id="genreTagWrapper">
+              <div class="tag-list" id="genreTagList"></div>
+              <input type="text" id="field_genre_input" class="tag-input-field" placeholder="Ketik lalu Enter atau koma…" autocomplete="off">
+            </div>
+            <!-- Hidden input menyimpan nilai CSV untuk dikirim ke API -->
+            <input type="hidden" id="field_genre" name="genre">
+            <span class="field-hint">Tekan Enter atau koma (,) untuk menambah genre</span>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="field_rating">Rating (0–10)</label>
+            <input type="number" id="field_rating" name="rating" class="field-input" min="0" max="10" step="0.1" placeholder="7.5">
+            <span class="error-msg" id="err-rating"></span>
+          </div>
+          <div class="field">
+            <label class="field-label" for="field_duration">Durasi (menit)</label>
+            <input type="number" id="field_duration" name="duration" class="field-input" min="0" placeholder="120">
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="field_director">Sutradara</label>
+            <input type="text" id="field_director" name="director" class="field-input" placeholder="Nama sutradara">
+          </div>
+          <div class="field">
+            <label class="field-label" for="field_actor">Pemeran</label>
+            <input type="text" id="field_actor" name="actor" class="field-input" placeholder="Pisahkan dengan koma">
+          </div>
+
+          <div class="field full">
+            <label class="field-label" for="field_synopsis">Sinopsis</label>
+            <textarea id="field_synopsis" name="synopsis" class="field-textarea" rows="3" placeholder="Deskripsi singkat…"></textarea>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="field_country">Negara</label>
+            <input type="text" id="field_country" name="country" class="field-input" placeholder="USA, Jepang, …">
+          </div>
+          <div class="field">
+            <label class="field-label" for="field_studio_input">Studio</label>
+            <div class="tag-input-wrapper" id="studioTagWrapper">
+              <div class="tag-list" id="studioTagList"></div>
+              <input type="text" id="field_studio_input" class="tag-input-field" placeholder="Ketik lalu Enter atau koma…" autocomplete="off">
+            </div>
+            <input type="hidden" id="field_studio" name="studio">
+            <span class="field-hint">Tekan Enter atau koma (,) untuk menambah studio</span>
+          </div>
+
+          <div class="field full">
+            <label class="field-label" for="field_tag">Tag</label>
+            <input type="text" id="field_tag" name="tag" class="field-input" placeholder="Pisahkan dengan koma">
+          </div>
+
+          <div class="field full">
+            <label class="field-label" for="field_approved">Status Validasi</label>
+            <select id="field_approved" name="approved" class="field-select">
+              <option value="0">Unapproved — perlu review</option>
+              <option value="1">Approved — langsung valid</option>
+            </select>
+          </div>
+
+          <!-- Path section — collapsible -->
+          <details class="field full field-details">
+            <summary class="field-details-summary">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+              Path File &amp; Media
+            </summary>
+            <div class="form-grid" style="margin-top: 12px;">
+              <div class="field full">
+                <label class="field-label" for="field_file_path">Path File Video</label>
+                <input type="text" id="field_file_path" name="file_path" class="field-input" placeholder="D:\Films\judul\film.mkv">
+              </div>
+              <div class="field full">
+                <label class="field-label" for="field_cover_path">Path Cover/Poster</label>
+                <input type="text" id="field_cover_path" name="cover_path" class="field-input" placeholder="D:\Films\judul\cover.jpg">
+              </div>
+              <div class="field full">
+                <label class="field-label" for="field_background_path">Path Background</label>
+                <input type="text" id="field_background_path" name="background_path" class="field-input" placeholder="D:\Films\judul\bg.jpg">
+              </div>
+              <div class="field full">
+                <label class="field-label" for="field_subtitle_path">Path Subtitle</label>
+                <input type="text" id="field_subtitle_path" name="subtitle_path" class="field-input" placeholder="D:\Films\judul\subtitle.id.srt">
+              </div>
+            </div>
+          </details>
+        </div>
+
+        <!-- Banner error dari server -->
+        <div id="formErrorBanner" class="form-error-banner" style="display:none;"></div>
+      </form>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" id="modalCancelBtn">Batal</button>
+        <button type="submit" class="btn btn-primary" id="modalSaveBtn" form="movieForm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg>
+          Simpan Film
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

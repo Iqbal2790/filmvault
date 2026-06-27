@@ -1,0 +1,12 @@
+{
+  "name": "filmvault-cloud",
+  "version": "2.0.0",
+  "description": "Database film online (Serverless)",
+  "scripts": {
+    "start": "serve client",
+    "dev": "serve client"
+  },
+  "devDependencies": {
+    "serve": "^14.2.1"
+  }
+}
