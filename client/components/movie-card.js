@@ -13,9 +13,18 @@ export function getInitials(title) {
 
 export function renderCard(film, { onEdit, onDelete } = {}) {
   const initials  = getInitials(film.title);
-  const approved  = film.approved === 1 || film.approved === true;
   const rating    = film.rating != null ? parseFloat(film.rating).toFixed(1) : null;
   const localDiff = film.local_title && film.local_title !== film.title;
+
+  let dotClass = 'dot-unapproved';
+  let statusText = 'Plan to Watch';
+  if (film.status === 'Watched') {
+    dotClass = 'dot-approved';
+    statusText = 'Watched';
+  } else if (film.status === 'Dropped') {
+    dotClass = 'dot-dropped';
+    statusText = 'Dropped';
+  }
 
   // Poster: pakai gambar jika cover_path tersedia
   const posterInner = film.cover_path
@@ -32,8 +41,8 @@ export function renderCard(film, { onEdit, onDelete } = {}) {
         <div class="poster-initials">${initials}</div>
         ${posterInner}
 
-        <div class="card-status-dot ${approved ? 'dot-approved' : 'dot-unapproved'}"
-             title="${approved ? 'Approved' : 'Perlu Review'}"></div>
+        <div class="card-status-dot ${dotClass}"
+             title="${statusText}"></div>
 
         ${rating !== null ? `<div class="card-rating-badge">★ ${rating}</div>` : ''}
 

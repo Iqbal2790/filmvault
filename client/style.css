@@ -654,7 +654,8 @@ body {
 }
 
 .dot-approved   { background: #16a34a; }
-.dot-unapproved { background: #dc2626; }
+.dot-unapproved { background: #f59e0b; }
+.dot-dropped    { background: #dc2626; }
 
 .card-rating-badge {
   position: absolute;

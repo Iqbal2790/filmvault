@@ -468,14 +468,14 @@ async function loadStats() {
 
     const { data: allMovies, error } = await supabase
       .from('movies')
-      .select('approved, rating, title')
+      .select('status, rating, title')
       .eq('user_id', userId);
       
     if (error) throw error;
 
     const total = allMovies.length;
-    const approved = allMovies.filter(m => m.approved === 1 || m.approved === true).length;
-    const review = total - approved;
+    const approved = allMovies.filter(m => m.status === 'Watched').length;
+    const review = allMovies.filter(m => m.status === 'Plan to Watch').length;
     
     const validRatings = allMovies.filter(m => m.rating).map(m => Number(m.rating));
     const avgRating = validRatings.length ? (validRatings.reduce((a,b)=>a+b,0) / validRatings.length).toFixed(1) : '—';
@@ -580,8 +580,7 @@ function attachCardEvents() {
   gridContainer.querySelectorAll('.film-card').forEach(card => {
     card.addEventListener('click', (e) => {
       if (e.target.closest('.card-action-btn')) return;
-      const id   = parseInt(card.dataset.id);
-      const film = state.films.find(f => f.id === id);
+      const film = state.films.find(f => f.id == card.dataset.id);
       if (film) openDrawer(film);
     });
 
@@ -596,8 +595,7 @@ function attachCardEvents() {
   gridContainer.querySelectorAll('.btn-edit').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id   = parseInt(btn.dataset.id);
-      const film = state.films.find(f => f.id === id);
+      const film = state.films.find(f => f.id == btn.dataset.id);
       if (film) openModal(film);
     });
   });
@@ -605,8 +603,7 @@ function attachCardEvents() {
   gridContainer.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id   = parseInt(btn.dataset.id);
-      const film = state.films.find(f => f.id === id);
+      const film = state.films.find(f => f.id == btn.dataset.id);
       if (film) deleteFilm(film);
     });
   });
@@ -627,14 +624,10 @@ function initDrawer() {
     ?.addEventListener('click', () => {
       if (state.current) openModal(state.current);
     });
-
-  document.getElementById('approveToggleBtn')
-    ?.addEventListener('click', toggleApprove);
 }
 
 function openDrawer(film) {
   state.current = film;
-  const approved = film.approved === 1 || film.approved === true;
 
   const initEl = document.getElementById('drawerInit');
   if (initEl) initEl.textContent = getInitials(film.title);
@@ -664,6 +657,13 @@ function openDrawer(film) {
   }
   setText('drawerYear',     film.year     || '—');
   setText('drawerRating',   film.rating != null ? `★ ${parseFloat(film.rating).toFixed(1)}` : '—');
+  
+  const reviewEl = document.getElementById('drawerReview');
+  if (reviewEl) {
+    reviewEl.textContent = film.review || 'Belum ada review pribadi.';
+    reviewEl.style.display = film.review ? 'block' : 'none';
+  }
+  
   setText('drawerSynopsis', film.synopsis || 'Tidak ada sinopsis.');
   setText('drawerDirector', film.director || '—');
   setText('drawerDuration', film.duration ? `${film.duration} menit` : '—');
@@ -707,18 +707,14 @@ function openDrawer(film) {
   setText('drawerCoverPath', film.cover_path        || '—');
   setText('drawerBgPath',    film.background_path   || '—');
 
-  updateDrawerStatus(approved);
+  updateDrawerStatus(film.status);
   
   if (state.isPublicView) {
     const editBtn = document.getElementById('drawerEditBtn');
-    const approveBtn = document.getElementById('approveToggleBtn');
     if (editBtn) editBtn.style.display = 'none';
-    if (approveBtn) approveBtn.style.display = 'none';
   } else {
     const editBtn = document.getElementById('drawerEditBtn');
-    const approveBtn = document.getElementById('approveToggleBtn');
     if (editBtn) editBtn.style.display = 'inline-flex';
-    if (approveBtn) approveBtn.style.display = 'inline-flex';
   }
 
   drawerBg?.classList.add('open');
@@ -731,47 +727,17 @@ function closeDrawer() {
   state.current = null;
 }
 
-function updateDrawerStatus(approved) {
+function updateDrawerStatus(status) {
   const statusEl = document.getElementById('drawerStatus');
-  const btn      = document.getElementById('approveToggleBtn');
+  if (!statusEl) return;
 
-  if (!statusEl || !btn) return;
-
-  if (approved) {
+  statusEl.textContent = status || 'Plan to Watch';
+  if (status === 'Watched') {
     statusEl.className = 'badge badge-green';
-    statusEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><polyline points="20 6 9 17 4 12"/></svg> Approved`;
-    btn.innerHTML  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Set Unapproved`;
-    btn.className  = 'btn btn-outline';
-  } else {
+  } else if (status === 'Dropped') {
     statusEl.className = 'badge badge-red';
-    statusEl.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:10px;height:10px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Perlu Review`;
-    btn.innerHTML  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><polyline points="20 6 9 17 4 12"/></svg> Set Approved`;
-    btn.className  = 'btn btn-primary';
-  }
-}
-
-async function toggleApprove() {
-  if (!state.current) return;
-  const film      = state.current;
-  const newStatus = (film.approved === 1 || film.approved === true) ? 0 : 1;
-
-  try {
-    const { error } = await supabase
-      .from('movies')
-      .update({ approved: newStatus })
-      .eq('id', film.id);
-
-    if (error) throw error;
-
-    film.approved  = newStatus;
-    state.current  = film;
-    updateDrawerStatus(newStatus === 1);
-
-    showToast(newStatus === 1 ? 'Film di-approved ✓' : 'Film di-unapprove', newStatus === 1 ? 'success' : '');
-    await Promise.all([loadMovies(), loadStats()]);
-  } catch (err) {
-    console.error('[toggleApprove]', err);
-    showToast('Gagal mengubah status: ' + err.message, 'error');
+  } else {
+    statusEl.className = 'badge badge-amber';
   }
 }
 
@@ -1005,9 +971,14 @@ function openModal(film = null) {
   setTags('genreTagList',  'field_genre',  film?.genre  ?? '');
   setTags('studioTagList', 'field_studio', film?.studio ?? '');
 
-  const approvedEl = document.getElementById('field_approved');
-  if (approvedEl) {
-    approvedEl.value = (film?.approved === 1 || film?.approved === true) ? '1' : '0';
+  const statusEl = document.getElementById('field_status');
+  if (statusEl) {
+    statusEl.value = film?.status ?? 'Plan to Watch';
+  }
+  
+  const reviewEl = document.getElementById('field_review');
+  if (reviewEl) {
+    reviewEl.value = film?.review ?? '';
   }
 
   const idEl = document.getElementById('field_id');
@@ -1116,6 +1087,7 @@ async function saveFilm() {
     'title', 'local_title', 'year', 'genre', 'synopsis', 'director',
     'actor', 'rating', 'duration', 'country', 'studio', 'tag',
     'file_path', 'cover_path', 'background_path', 'subtitle_path',
+    'status', 'review'
   ];
 
   const data = {};
@@ -1123,7 +1095,6 @@ async function saveFilm() {
     const el = document.getElementById(`field_${key}`);
     if (el) data[key] = el.value.trim() || null;
   });
-  data.approved = document.getElementById('field_approved')?.value === '1' ? 1 : 0;
 
   const saveBtn = document.getElementById('modalSaveBtn');
   if (saveBtn) {
