@@ -37,6 +37,7 @@ export function renderCard(film, { onEdit, onDelete } = {}) {
 
         ${rating !== null ? `<div class="card-rating-badge">★ ${rating}</div>` : ''}
 
+        ${new URLSearchParams(window.location.search).has('user') ? '' : `
         <div class="card-actions">
           <button class="card-action-btn btn-edit" data-id="${film.id}" title="Edit">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -52,6 +53,7 @@ export function renderCard(film, { onEdit, onDelete } = {}) {
             </svg>
           </button>
         </div>
+        `}
       </div>
 
       <div class="card-body">

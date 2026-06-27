@@ -23,6 +23,9 @@ const state = {
   films    : [],
   current  : null,   // film yang sedang dibuka di drawer
   editMode : false,  // true = edit, false = tambah baru
+  isPublicView: false,
+  publicUserId: null,
+  publicUsername: null,
 };
 
 // ════════════════════════════════════════════
@@ -51,8 +54,47 @@ const loadingState   = document.getElementById('loadingState');
 // ════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTheme();
+  
+  // Check for public profile URL parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  const publicUser = urlParams.get('user');
+  
+  if (publicUser) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, username')
+      .eq('username', publicUser)
+      .single();
+      
+    if (profile) {
+      state.isPublicView = true;
+      state.publicUserId = profile.id;
+      state.publicUsername = profile.username;
+      
+      const titleEl = document.querySelector('.header-title');
+      if (titleEl) titleEl.innerHTML = `FilmVault <span style="font-size: 14px; color: var(--ink-3); font-weight: normal;">punya ${profile.username}</span>`;
+      
+      document.getElementById('loginBtn').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+      document.getElementById('openAddModal').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'none';
+      
+      initSort();
+      initAlpha();
+      initTabs();
+      initDrawer();
+      initKeyboard();
+      initToastContainer();
+      initRetryBtn();
+      
+      loadStats();
+      loadMovies();
+      return; // Skip initAuth
+    }
+  }
+
   initAuth();
   initSearch();
   initSort();
@@ -62,7 +104,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initModal();
   initPosterUpload({
     onUploaded: (newPath) => {
-      // Sinkronkan cover_path di state film yang sedang dibuka di drawer
       if (state.current) state.current.cover_path = newPath;
     },
     onDeleted: () => {
@@ -72,8 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initKeyboard();
   initToastContainer();
   initRetryBtn();
-  loadStats();
-  loadMovies();
 });
 
 // ════════════════════════════════════════════
@@ -244,10 +283,17 @@ async function loadMovies() {
   showLoading(true);
 
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
-    if (userError || !user) throw new Error('Not authenticated');
+    let userId = null;
+    
+    if (state.isPublicView) {
+      userId = state.publicUserId;
+    } else {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) throw new Error('Not authenticated');
+      userId = user.id;
+    }
 
-    let query = supabase.from('movies').select('*').eq('user_id', user.id);
+    let query = supabase.from('movies').select('*').eq('user_id', userId);
 
     if (state.search) {
       query = query.ilike('title', `%${state.search}%`);
@@ -306,13 +352,20 @@ async function loadStats() {
   showStatSkeleton(true);
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    let userId = null;
+    
+    if (state.isPublicView) {
+      userId = state.publicUserId;
+    } else {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      userId = user.id;
+    }
 
     const { data: allMovies, error } = await supabase
       .from('movies')
       .select('approved, rating, title')
-      .eq('user_id', user.id);
+      .eq('user_id', userId);
       
     if (error) throw error;
 
@@ -551,6 +604,18 @@ function openDrawer(film) {
   setText('drawerBgPath',    film.background_path   || '—');
 
   updateDrawerStatus(approved);
+  
+  if (state.isPublicView) {
+    const editBtn = document.getElementById('drawerEditBtn');
+    const approveBtn = document.getElementById('approveToggleBtn');
+    if (editBtn) editBtn.style.display = 'none';
+    if (approveBtn) approveBtn.style.display = 'none';
+  } else {
+    const editBtn = document.getElementById('drawerEditBtn');
+    const approveBtn = document.getElementById('approveToggleBtn');
+    if (editBtn) editBtn.style.display = 'inline-flex';
+    if (approveBtn) approveBtn.style.display = 'inline-flex';
+  }
 
   drawerBg?.classList.add('open');
   document.body.style.overflow = 'hidden';
