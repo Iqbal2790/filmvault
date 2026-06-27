@@ -129,7 +129,12 @@ async function initAuth() {
   const profileName = document.getElementById('profileName');
 
   loginBtn.addEventListener('click', async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({ 
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin
+      }
+    });
   });
 
   logoutBtn.addEventListener('click', async () => {
