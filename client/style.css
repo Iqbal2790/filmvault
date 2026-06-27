@@ -1567,56 +1567,111 @@ body {
 }
 
 /* ════════════════════════════════════════════
-   MEDIA QUERIES (RESPONSIVE)
+   MEDIA QUERIES (NATIVE APP FEEL)
 ════════════════════════════════════════════ */
+
+/* Sembunyikan navigasi bawah & FAB di desktop */
+.bottom-nav { display: none; }
+.fab-mobile { display: none; }
+
 @media (max-width: 768px) {
-  .topnav-inner {
-    padding: 0 12px;
+  /* Hilangkan Top Tabs dan padding di mobile */
+  .nav-tabs { display: none; }
+  .topnav-inner { padding: 0 16px; }
+
+  /* Toolbar: sembunyikan sort button desktop */
+  .toolbar-inner { flex-direction: column; align-items: stretch; gap: 12px; padding: 12px 16px; }
+  .sort-btns { display: none; }
+  .sort-dropdown-mobile { display: block; width: 100%; }
+  
+  /* Sembunyikan alpha strip di mobile agar tidak sempit */
+  .alpha-strip { display: none; }
+  .alpha-strip-inner { display: none; }
+  
+  /* Sembunyikan Add Movie Button di Header karena akan jadi FAB */
+  #openAddModal { display: none !important; }
+
+  /* Grid layout sedikit lebih lebar di mobile */
+  .card-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .card-poster { height: 210px; }
+
+  .page { padding: 16px; padding-bottom: 90px; /* Sisakan ruang untuk bottom nav */ }
+
+  .stats-strip { flex-wrap: wrap; gap: 12px; }
+  .stat-tile { flex: 1 1 calc(50% - 6px); padding: 12px; }
+
+  /* BOTTOM NAVIGATION BAR */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    z-index: 100;
+    height: 64px;
+    padding-bottom: env(safe-area-inset-bottom); /* Dukungan iPhone */
+    justify-content: space-around;
+    align-items: center;
   }
   
-  .nav-tabs {
-    display: none;
+  .bottom-nav-item {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    color: var(--ink-3);
+    flex: 1; height: 100%;
+    cursor: pointer;
+    font-size: 10px; font-weight: 500;
+    gap: 4px;
+    transition: color 0.15s;
   }
+  .bottom-nav-item svg { width: 22px; height: 22px; }
+  .bottom-nav-item.active { color: var(--primary); }
 
-  .toolbar-inner {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 12px;
+  /* FLOATING ACTION BUTTON (FAB) */
+  .fab-mobile {
+    display: flex;
+    position: fixed;
+    right: 20px;
+    bottom: 84px; /* di atas bottom nav */
+    width: 56px; height: 56px;
+    border-radius: 28px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(79, 126, 240, 0.4);
+    align-items: center; justify-content: center;
+    z-index: 99;
+    cursor: pointer;
   }
+  .fab-mobile svg { width: 24px; height: 24px; }
 
-  .sort-btns {
-    display: none;
-  }
-
-  .sort-dropdown-mobile {
-    display: block;
-    width: 100%;
-  }
-
-  .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 12px;
-  }
-  
-  .card-poster {
-    height: 160px;
-  }
-
+  /* BOTTOM SHEET (Drawer di Mobile) */
   .drawer {
     width: 100%;
-  }
-
-  .page {
-    padding: 12px;
-  }
-
-  .stats-strip {
-    flex-wrap: wrap;
-    gap: 12px;
+    top: auto; bottom: 0; left: 0; right: 0;
+    height: 85vh;
+    border-radius: 20px 20px 0 0;
+    border-left: none;
+    border-top: 1px solid var(--line);
+    transform: translateY(100%);
   }
   
-  .stat-tile {
-    flex: 1 1 calc(50% - 6px);
+  .drawer-bg.open .drawer { transform: translateY(0); }
+  
+  /* Swipe Indicator (Garis kecil di atas bottom sheet) */
+  .drawer-topbar::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 36px; height: 4px;
+    background: var(--line);
+    border-radius: 4px;
   }
+  .drawer-topbar { padding: 20px 20px 14px 20px; border-bottom: none; }
+  .drawer-hero { padding: 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .drawer-scroll { padding: 20px; padding-bottom: 80px; }
+  .drawer-footer { display: none; /* Kita pindahkan aksi edit ke topbar drawer atau FAB, tapi untuk simple kita pertahankan tombol edit dengan style beda jika butuh */ }
+  
+  /* Tombol edit di bawah detail */
+  #drawerEditBtn { width: 100%; margin-top: 20px; }
 }

@@ -150,6 +150,9 @@ async function initAuth() {
       addBtn.style.display = 'inline-flex';
       empty.style.display = 'none';
       
+      const fabBtn = document.getElementById('fabAddBtn');
+      if (fabBtn) fabBtn.style.display = 'flex';
+      
       let username = session.user.email.split('@')[0];
 
       // Auto create profile if not exists
@@ -182,6 +185,9 @@ async function initAuth() {
       logoutBtn.style.display = 'none';
       settingsBtn.style.display = 'none';
       addBtn.style.display = 'none';
+      
+      const fabBtn = document.getElementById('fabAddBtn');
+      if (fabBtn) fabBtn.style.display = 'none';
       
       grid.innerHTML = '';
       empty.style.display = 'flex';
@@ -365,18 +371,58 @@ function initAlpha() {
 }
 
 // ════════════════════════════════════════════
-// TABS — Semua / Approved / Perlu Review
+// TABS & BOTTOM NAV — Semua / Watched / Plan to Watch
 // ════════════════════════════════════════════
 function initTabs() {
   tabAll?.addEventListener('click',      () => switchTab(null, tabAll));
-  tabApproved?.addEventListener('click', () => switchTab(1,    tabApproved));
-  tabReview?.addEventListener('click',   () => switchTab(0,    tabReview));
+  tabApproved?.addEventListener('click', () => switchTab('Watched', tabApproved));
+  tabReview?.addEventListener('click',   () => switchTab('Plan to Watch', tabReview));
+
+  // Init Bottom Nav
+  document.querySelectorAll('.bottom-nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      if (item.id === 'bottomNavSearch') {
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+          searchInput.focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        return;
+      }
+      
+      const filter = item.dataset.filter;
+      document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+      
+      let statusVal = null;
+      if (filter === 'Watched') statusVal = 'Watched';
+      if (filter === 'Plan to Watch') statusVal = 'Plan to Watch';
+      
+      // Sinkronkan juga tab desktop
+      state.status = statusVal;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      if (statusVal === null && tabAll) tabAll.classList.add('active');
+      if (statusVal === 'Watched' && tabApproved) tabApproved.classList.add('active');
+      if (statusVal === 'Plan to Watch' && tabReview) tabReview.classList.add('active');
+      
+      loadMovies();
+    });
+  });
 }
 
-function switchTab(approvedVal, el) {
-  state.approved = approvedVal;
+function switchTab(statusVal, el) {
+  state.status = statusVal;
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   el?.classList.add('active');
+  
+  // Sinkronkan bottom nav
+  document.querySelectorAll('.bottom-nav-item').forEach(nav => {
+    nav.classList.remove('active');
+    if (nav.dataset.filter === 'all' && statusVal === null) nav.classList.add('active');
+    if (nav.dataset.filter === 'Watched' && statusVal === 'Watched') nav.classList.add('active');
+    if (nav.dataset.filter === 'Plan to Watch' && statusVal === 'Plan to Watch') nav.classList.add('active');
+  });
+
   loadMovies();
 }
 
@@ -403,8 +449,8 @@ async function loadMovies() {
       query = query.ilike('title', `%${state.search}%`);
     }
 
-    if (state.approved !== null) {
-      query = query.eq('approved', state.approved);
+    if (state.status) {
+      query = query.eq('status', state.status);
     }
 
     if (state.letter) {
