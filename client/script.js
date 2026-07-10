@@ -11,6 +11,7 @@ import { initPosterUpload, openPosterUpload, resetPosterUpload } from './compone
 import { supabase } from './supabase-client.js';
 import { searchMoviesTMDB, getMovieDetailsTMDB } from './components/tmdb.js';
 import { searchAnimeJikan, getAnimeDetailsJikan } from './components/jikan.js';
+import { getAnimeDetailsAnidb } from './components/anidb.js';
 
 // ════════════════════════════════════════════
 // STATE
@@ -951,8 +952,16 @@ function initModal() {
       let results = [];
       if (type === 'movie') {
         results = await searchMoviesTMDB(query);
-      } else {
+      } else if (type === 'anime') {
         results = await searchAnimeJikan(query);
+      } else if (type === 'anidb') {
+        const idQuery = parseInt(query);
+        if (!isNaN(idQuery)) {
+           const details = await getAnimeDetailsAnidb(idQuery);
+           if (details) {
+              results = [{ id: details.anidbId, title: details.title }];
+           }
+        }
       }
       
       apiBtn.textContent = 'Cari';
@@ -1009,7 +1018,7 @@ function initModal() {
               const studios = details.production_companies?.map(c => c.name).join(', ') || '';
               setTags('studioTagList', 'field_studio', studios);
             }
-          } else {
+          } else if (rType === 'anime') {
             details = await getAnimeDetailsJikan(id);
             if (details) {
               document.getElementById('field_title').value = details.title_japanese || details.title;
@@ -1028,6 +1037,15 @@ function initModal() {
               
               const studios = details.studios?.map(c => c.name).join(', ') || '';
               setTags('studioTagList', 'field_studio', studios);
+            }
+          } else if (rType === 'anidb') {
+            details = await getAnimeDetailsAnidb(id);
+            if (details) {
+              document.getElementById('field_title').value = details.title || '';
+              document.getElementById('field_local_title').value = details.title || '';
+              document.getElementById('field_synopsis').value = details.description || '';
+              // AniDB XML data doesn't map directly to easily-accessible posters or nested arrays 
+              // without complex parsing, so we just prefill title and synopsis.
             }
           }
           
